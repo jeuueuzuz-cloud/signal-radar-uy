@@ -2,7 +2,9 @@ name: Build Signal Radar APK
 on:
 workflow_dispatch:
 push:
-branches: [ main, master ]
+branches:
+- main
+- master
 jobs:
 build:
 runs-on: ubuntu-latest
@@ -29,7 +31,6 @@ flutter pub add 'flutter_blue_plus:^1.35.0' 'wifi_scan:^0.4.1+2' 'geolocator:^13
 run: |
 python3 - << 'EOF'
 import os, re
-# 1. تنظيف ملف main.dart تلقائيا من أي رموز زائدة وتصحيح الألوان
 main_path = "app_build/lib/main.dart"
 with open(main_path, "r", encoding="utf-8") as f:
 lines = f.readlines()
@@ -39,7 +40,6 @@ code = "".join(cleaned_lines)
 code = code.replace("Colors.emerald", "const Color(0xFF10B981)")
 with open(main_path, "w", encoding="utf-8") as f:
 f.write(code)
-# 2. إضافة صلاحيات البلوتوث والواي فاي والموقع
 manifest_path = "app_build/android/app/src/main/AndroidManifest.xml"
 permissions = """
 <uses-permission android:name="android.permission.INTERNET" />
@@ -59,7 +59,6 @@ if "BLUETOOTH_SCAN" not in manifest:
 manifest = manifest.replace("<application", permissions + "\n    <application", 1)
 with open(manifest_path, "w", encoding="utf-8") as f:
 f.write(manifest)
-# 3. رفع minSdk إلى 24 لتوافق كافة المكتبات
 for gradle_path in ["app_build/android/app/build.gradle.kts", "app_build/android/app/build.gradle"]:
 if os.path.exists(gradle_path):
 with open(gradle_path, "r", encoding="utf-8") as f:
